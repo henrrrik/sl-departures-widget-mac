@@ -21,6 +21,12 @@ build: gen
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -configuration $(CONFIG) \
 		-derivedDataPath $(BUILD) build
 
+## Redraw the app icon from Design/app-icon-source.jpg. Only needed when the
+## artwork changes — the rendered sizes are committed.
+icon:
+	swift Tools/make-app-icon.swift Design/app-icon-source.jpg \
+		App/Assets.xcassets/AppIcon.appiconset
+
 ## Exercise the model. No Xcode, no bundle, no UI.
 test:
 	swift test

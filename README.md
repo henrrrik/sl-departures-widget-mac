@@ -130,6 +130,7 @@ Useful for checking what the menu bar is claiming against the API by hand.
 | `App/` | The menu bar app: status items, the shared fetch hub, the popover, settings. |
 | `Widget/` | The WidgetKit extension: configuration intent, timeline provider, tile. |
 | `project.yml` | XcodeGen spec for the two bundles. The `.xcodeproj` is generated. |
+| `Design/`, `Tools/` | The app icon's source artwork, and the script that lays it out on Apple's icon grid — `make icon` redraws every size. |
 
 ### Shared fetching
 
@@ -192,4 +193,5 @@ without a bundle, a signature, or a running UI.
 MIT — see [LICENSE](LICENSE).
 
 Departure data comes from SL via [Trafiklab](https://www.trafiklab.se/); this
-project is not affiliated with or endorsed by SL or Region Stockholm.
+project is not affiliated with or endorsed by SL or Region Stockholm. The app
+icon is original artwork — it is not SL's logo, or any other mark of theirs.

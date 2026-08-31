@@ -44,6 +44,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.henrrrik.sl-departures
         PRODUCT_NAME: SL Departures
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_NSHumanReadableCopyright: "MIT"
         ENABLE_APP_SANDBOX: NO
     info:
