@@ -133,7 +133,6 @@ struct BoardView: View {
                     Text("Updated \(stream.snapshot.fetchedAt, format: .dateTime.hour().minute())")
                 }
                 Spacer()
-                Text("r refresh · s stops · esc close")
             }
             .font(.caption2)
             .foregroundStyle(.secondary)
