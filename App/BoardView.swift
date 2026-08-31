@@ -185,7 +185,7 @@ private struct DepartureRowView: View {
                         .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
                 }
 
-                Text(row.cancelled ? "Inställd" : row.waitLabel)
+                Text(row.cancelled ? String(localized: "Cancelled") : row.waitLabel)
                     .font(.body)
                     .monospacedDigit()
                     .foregroundStyle(row.cancelled ? AnyShapeStyle(.red) : AnyShapeStyle(.primary))

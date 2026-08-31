@@ -1,6 +1,9 @@
 name: SLDepartures
 options:
   bundleIdPrefix: io.github.henrrrik
+  # English is the source language and lives in the code as the string keys;
+  # sv.lproj carries the translation for both bundles.
+  developmentLanguage: en
   deploymentTarget:
     macOS: "15.0"
   createIntermediateGroups: true

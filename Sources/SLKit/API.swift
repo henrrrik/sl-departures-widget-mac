@@ -132,10 +132,10 @@ public enum SLError: Error, LocalizedError, Equatable {
 
     public var errorDescription: String? {
         switch self {
-        case .unreachable: "No response from SL"
-        case .httpStatus(let code): "SL replied \(code)"
-        case .tooLarge: "SL response larger than expected, refusing"
-        case .unreadable: "Unreadable response from SL"
+        case .unreachable: t("No response from SL")
+        case .httpStatus(let code): t("SL replied \(code)")
+        case .tooLarge: t("SL response larger than expected, refusing")
+        case .unreadable: t("Unreadable response from SL")
         }
     }
 }

@@ -7,13 +7,14 @@ import PackageDescription
 // the same bet the Omarchy widget made by keeping Model.js free of QML types.
 let package = Package(
     name: "SLKit",
+    defaultLocalization: "en",
     platforms: [.macOS(.v15)],
     products: [
         .library(name: "SLKit", targets: ["SLKit"]),
         .executable(name: "sl-departures", targets: ["sl-departures"])
     ],
     targets: [
-        .target(name: "SLKit"),
+        .target(name: "SLKit", resources: [.process("Resources")]),
         // The terminal half: finding a stop id, and checking by hand what the
         // menu bar is claiming. The Omarchy repo's `bin/sl-sites` cannot run
         // here — it is GNU `stat -c` all the way down.

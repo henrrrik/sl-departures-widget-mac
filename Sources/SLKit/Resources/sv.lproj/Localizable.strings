@@ -1,0 +1,27 @@
+/* The words SLKit renders itself. Keys are the English text. */
+
+/* A departure leaving within the minute */
+"now" = "nu";
+
+/* Spelled-out wait, e.g. "7 min" */
+"%lld min" = "%lld min";
+
+/* Transport modes, as SL names them */
+"Bus" = "Buss";
+"Metro" = "Tunnelbana";
+"Train" = "Tåg";
+"Tram" = "Spårvagn";
+"Ship" = "Båt";
+"Ferry" = "Färja";
+"Taxi" = "Taxi";
+
+/* Filter summary under the stop name */
+"Line %@" = "Linje %@";
+"Direction %lld" = "Riktning %lld";
+"%lld min walk" = "%lld min gångväg";
+
+/* Fetch failures */
+"No response from SL" = "Inget svar från SL";
+"SL replied %lld" = "SL svarade %lld";
+"SL response larger than expected, refusing" = "SL:s svar var större än väntat, avbryter";
+"Unreadable response from SL" = "Oläsligt svar från SL";

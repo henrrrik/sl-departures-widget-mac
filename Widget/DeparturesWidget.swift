@@ -4,6 +4,12 @@ import WidgetKit
 
 @main
 struct SLWidgetBundle: WidgetBundle {
+    init() {
+        // Same reason as the app: SLKit's own words follow the extension's
+        // language, which is the one the tile is drawn in.
+        SLLanguage.followSystem()
+    }
+
     var body: some Widget {
         DeparturesWidget()
     }

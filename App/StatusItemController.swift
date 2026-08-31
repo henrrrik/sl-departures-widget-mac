@@ -79,9 +79,9 @@ final class StatusItemController {
     }
 
     private func tooltip(rows: [DepartureRow]) -> String {
-        guard config.isConfigured else { return "SL Departures — click to pick a stop" }
+        guard config.isConfigured else { return String(localized: "SL Departures — click to pick a stop") }
         let name = config.siteName.isEmpty ? "SL" : config.siteName
-        guard !rows.isEmpty else { return "\(name) — no departures" }
+        guard !rows.isEmpty else { return String(localized: "\(name) — no departures") }
         let lines = rows.prefix(5).map { "\($0.line)  \($0.destination)  \($0.waitLabel)" }
         return ([name] + lines).joined(separator: "\n")
     }

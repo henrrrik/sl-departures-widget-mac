@@ -95,4 +95,16 @@ struct FormatTests {
         #expect(SLFormat.modeName("SOMETHING_NEW") == "Something_new", "an unknown mode still reads as a word")
         #expect(SLFormat.symbol(for: "SOMETHING_NEW") == "clock")
     }
+
+    @Test("Swedish reaches the words SLKit renders itself")
+    func swedishCatalog() {
+        let sv = Locale(identifier: "sv")
+        #expect(localized("now", in: sv) == "nu")
+        #expect(localized("Bus", in: sv) == "Buss")
+        #expect(localized("Line \("13, 14")", in: sv) == "Linje 13, 14")
+        #expect(localized("\(5) min walk", in: sv) == "5 min gångväg")
+        // English is the default, so the model says the same thing wherever
+        // `swift test` runs.
+        #expect(SLFormat.waitLabel(0) == "now")
+    }
 }

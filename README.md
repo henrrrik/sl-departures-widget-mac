@@ -60,6 +60,10 @@ The board refreshes every 30 seconds and counts down continuously between
 fetches, so the minutes stay honest. A failed refresh leaves the last board on
 screen rather than blanking it.
 
+The interface follows your macOS language: English, or Swedish on a Swedish
+Mac. That covers the widget and its edit sheet too — down to the words the
+model writes itself, like `nu` for a departure leaving within the minute.
+
 ## Configuration
 
 Everything is in the settings window, and also in a plain file at

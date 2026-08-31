@@ -15,20 +15,25 @@ public enum SLFormat {
     ]
     static let defaultSymbol = "clock"
 
-    static let modeNames: [String: String] = [
-        "BUS": "Bus", "METRO": "Metro", "TRAIN": "Train", "TRAM": "Tram",
-        "SHIP": "Ship", "FERRY": "Ferry", "TAXI": "Taxi"
-    ]
-
     public static func symbol(for mode: String?) -> String {
         modeSymbols[(mode ?? "").uppercased()] ?? defaultSymbol
     }
 
     public static func modeName(_ mode: String?) -> String {
         let key = (mode ?? "").uppercased()
-        if let name = modeNames[key] { return name }
-        guard let first = key.first else { return "" }
-        return String(first) + key.dropFirst().lowercased()
+        switch key {
+        case "BUS": return t("Bus")
+        case "METRO": return t("Metro")
+        case "TRAIN": return t("Train")
+        case "TRAM": return t("Tram")
+        case "SHIP": return t("Ship")
+        case "FERRY": return t("Ferry")
+        case "TAXI": return t("Taxi")
+        default:
+            // An unknown mode still reads as a word, in SL's own spelling.
+            guard let first = key.first else { return "" }
+            return String(first) + key.dropFirst().lowercased()
+        }
     }
 
     // MARK: - Waits
@@ -41,17 +46,17 @@ public enum SLFormat {
 
     public static func minutesText(_ minutes: Int?) -> String {
         guard let minutes else { return "?" }
-        return minutes <= 0 ? "now" : String(minutes)
+        return minutes <= 0 ? t("now") : String(minutes)
     }
 
     public static func waitText(_ minutes: Int?) -> String {
         guard let minutes else { return "?" }
-        return minutes <= 0 ? "now" : "\(minutes)′"
+        return minutes <= 0 ? t("now") : "\(minutes)′"
     }
 
     public static func waitLabel(_ minutes: Int?) -> String {
         guard let minutes else { return "?" }
-        return minutes <= 0 ? "now" : "\(minutes) min"
+        return minutes <= 0 ? t("now") : t("\(minutes) min")
     }
 
     // MARK: - Bar label
@@ -134,9 +139,9 @@ public enum SLFormat {
     public static func filterSummary(_ config: StopConfig) -> String {
         var parts: [String] = []
         if !config.transport.isEmpty { parts.append(modeName(config.transport)) }
-        if !config.lines.isEmpty { parts.append("Line " + config.lines.joined(separator: ", ")) }
-        if config.direction != 0 { parts.append("Direction \(config.direction)") }
-        if config.walkMinutes > 0 { parts.append("\(config.walkMinutes) min walk") }
+        if !config.lines.isEmpty { parts.append(t("Line \(config.lines.joined(separator: ", "))")) }
+        if config.direction != 0 { parts.append(t("Direction \(config.direction)")) }
+        if config.walkMinutes > 0 { parts.append(t("\(config.walkMinutes) min walk")) }
         return parts.joined(separator: " · ")
     }
 }

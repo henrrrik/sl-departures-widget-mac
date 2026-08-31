@@ -1,0 +1,62 @@
+/* Swedish for the menu bar app. Keys are the English source text. */
+
+/* Product name, used as the settings window title and as the board's
+   header when no stop has been picked yet */
+"SL Departures" = "SL Avgångar";
+
+/* --- The board popover --- */
+"Refresh (r)" = "Uppdatera (r)";
+"Stops and settings (s)" = "Hållplatser och inställningar (s)";
+"No stop picked yet" = "Ingen hållplats vald än";
+"Choose a stop to start showing departures." = "Välj en hållplats så börjar avgångarna visas.";
+"Pick a stop…" = "Välj hållplats…";
+"Loading…" = "Läser in…";
+"Nothing leaving" = "Inga avgångar";
+"Asking SL for departures." = "Frågar SL efter avgångar.";
+"No departures in the next %lld minutes match these filters." = "Inga avgångar de närmaste %lld minuterna matchar filtren.";
+"Updated %@" = "Uppdaterad %@";
+/* A cancelled departure, in place of its wait */
+"Cancelled" = "Inställd";
+
+/* --- Menu bar tooltips --- */
+"SL Departures — click to pick a stop" = "SL Avgångar – klicka för att välja hållplats";
+"%@ — no departures" = "%@ – inga avgångar";
+
+/* --- Settings: the stop list --- */
+"No stop picked" = "Ingen hållplats vald";
+"No stops" = "Inga hållplatser";
+"Add a stop — each one gets its own menu bar item" = "Lägg till en hållplats – var och en får ett eget objekt i menyraden";
+"Remove this stop" = "Ta bort hållplatsen";
+
+/* --- Settings: stop and filters --- */
+"Stop" = "Hållplats";
+"Search stops" = "Sök hållplats";
+"Slussen, T-Centralen, …" = "Slussen, T-Centralen, …";
+"Showing" = "Visar";
+"Filters" = "Filter";
+"Transport" = "Trafikslag";
+"All modes" = "Alla trafikslag";
+"Direction" = "Riktning";
+"Both" = "Båda";
+"Lines" = "Linjer";
+"All lines, or e.g. 13, 14" = "Alla linjer, eller t.ex. 13, 14";
+"Walk" = "Gångtid";
+"No head start" = "Ingen marginal";
+"%lld min" = "%lld min";
+"Hides departures leaving sooner than your walk, so the board only shows what you could still catch." = "Döljer avgångar som går tidigare än din gångtid, så tavlan bara visar det du hinner till.";
+
+/* --- Settings: display --- */
+"Display" = "Visning";
+"In the menu bar" = "I menyraden";
+"In the popup" = "I popupfönstret";
+"%lld departures" = "%lld avgångar";
+"Menu bar format" = "Format i menyraden";
+"Tokens: {line} {wait} {min} {clock} {display} {destination}" = "Variabler: {line} {wait} {min} {clock} {display} {destination}";
+"Show the mode icon" = "Visa ikon för trafikslag";
+
+/* --- Settings: fetching --- */
+"Fetching" = "Hämtning";
+"Look ahead" = "Framåt";
+"Refresh every" = "Uppdatera var";
+"%lld s" = "%lld s";
+"Stops sharing a site and filters share one request, however many menu bar items show them." = "Hållplatser med samma plats och filter delar en förfrågan, hur många objekt i menyraden som än visar dem.";

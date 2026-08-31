@@ -12,6 +12,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let directory = SiteDirectory()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // The model renders words of its own — "now", the modes, the filter
+        // summary — and they follow the language this UI is drawn in.
+        SLLanguage.followSystem()
         syncStatusItems()
         observeSettings()
     }
@@ -88,7 +91,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "SL Departures"
+        window.title = String(localized: "SL Departures")
         window.contentViewController = NSHostingController(rootView: SettingsView(settings: settings))
         window.isReleasedWhenClosed = false
         window.center()
