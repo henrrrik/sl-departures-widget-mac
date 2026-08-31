@@ -1,0 +1,31 @@
+[
+ {
+  "id": 1032,
+  "name": "Rådmansgatan",
+  "note": "Sveavägen"
+ },
+ {
+  "id": 9001,
+  "name": "T-Centralen"
+ },
+ {
+  "id": 9117,
+  "name": "Odenplan"
+ },
+ {
+  "id": 9189,
+  "name": "Gullmarsplan"
+ },
+ {
+  "id": 9192,
+  "name": "Slussen"
+ },
+ {
+  "id": 9194,
+  "name": "Slussen/Stadsgården"
+ },
+ {
+  "id": 9195,
+  "name": "Slussen/Södermalmstorg"
+ }
+]

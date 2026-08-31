@@ -1,0 +1,10 @@
+.build/
+.swiftpm/
+DerivedData/
+.DS_Store
+
+# XcodeGen output — project.yml is the source of truth for all of these
+SLDepartures.xcodeproj/
+App/Info.plist
+Widget/Info.plist
+Widget/SLWidget.entitlements
