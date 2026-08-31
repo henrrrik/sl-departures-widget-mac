@@ -29,13 +29,17 @@ struct DeparturesWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: DeparturesEntry
 
+    /// The only thing the small family changes: how many departures fit.
+    /// Everything else — title, hairline, destinations, footer — is the same
+    /// board, narrower.
     private var visibleRows: [DepartureRow] {
         Array(entry.rows.prefix(family == .systemSmall ? 3 : 5))
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: family == .systemSmall ? 3 : 4) {
+        VStack(alignment: .leading, spacing: 0) {
             header
+            Divider().padding(.vertical, 4)
 
             if entry.rows.isEmpty {
                 Spacer()
@@ -44,10 +48,12 @@ struct DeparturesWidgetView: View {
                     .foregroundStyle(.secondary)
                 Spacer()
             } else {
-                ForEach(visibleRows) { row in
-                    DepartureLine(row: row, showDestination: family != .systemSmall)
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(visibleRows) { row in
+                        DepartureLine(row: row)
+                    }
                 }
-                Spacer(minLength: 0)
+                Spacer(minLength: 4)
             }
 
             footer
@@ -55,10 +61,12 @@ struct DeparturesWidgetView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
+    /// Titled header over a hairline, the way the app's own board — and the
+    /// rest of macOS — separates a title from the list it names.
     private var header: some View {
         HStack(spacing: 4) {
             Text(entry.siteName.isEmpty ? "SL Departures" : entry.siteName)
-                .font(.caption.weight(.semibold))
+                .font(.headline)
                 .lineLimit(1)
                 .widgetAccentable()
             Spacer(minLength: 2)
@@ -75,7 +83,7 @@ struct DeparturesWidgetView: View {
             if let error = entry.error {
                 Image(systemName: "wifi.slash")
                 Text(error).lineLimit(1)
-            } else if let deviation = entry.stopDeviations.first, family != .systemSmall {
+            } else if let deviation = entry.stopDeviations.first {
                 Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                 Text(deviation).lineLimit(1)
             } else if let fetchedAt = entry.fetchedAt {
@@ -95,7 +103,6 @@ struct DeparturesWidgetView: View {
 
 private struct DepartureLine: View {
     let row: DepartureRow
-    let showDestination: Bool
 
     var body: some View {
         HStack(spacing: 6) {
@@ -105,13 +112,11 @@ private struct DepartureLine: View {
                 .frame(minWidth: 22, alignment: .leading)
                 .strikethrough(row.cancelled)
 
-            if showDestination {
-                Text(row.destination)
-                    .font(.caption)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .strikethrough(row.cancelled)
-            }
+            Text(row.destination)
+                .font(.caption)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .strikethrough(row.cancelled)
 
             Spacer(minLength: 4)
 
@@ -119,6 +124,10 @@ private struct DepartureLine: View {
                 .font(.caption.weight(.medium))
                 .monospacedDigit()
                 .foregroundStyle(row.cancelled ? AnyShapeStyle(.red) : AnyShapeStyle(.primary))
+                // In the small family the row runs out of width first. The
+                // destination is the part that may truncate; the wait is not.
+                .fixedSize(horizontal: true, vertical: false)
+                .layoutPriority(1)
         }
     }
 }
