@@ -7,8 +7,9 @@ CONFIG   := Release
 BUILD    := .build/xcode
 APP      := $(BUILD)/Build/Products/$(CONFIG)/SL Departures.app
 INSTALLED := $(HOME)/Applications/SL Departures.app
+LSREGISTER := /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
-.PHONY: all gen build test install run stop clean
+.PHONY: all gen build test install run stop clean icon
 
 all: build
 
@@ -37,8 +38,11 @@ install: build stop
 	rm -rf "$(INSTALLED)"
 	mkdir -p "$(HOME)/Applications"
 	cp -R "$(APP)" "$(INSTALLED)"
-	/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
-		-f "$(INSTALLED)"
+	$(LSREGISTER) -f "$(INSTALLED)"
+	# Xcode registers the build-products copy as it builds. Two registrations
+	# of one bundle id leave the widget gallery listing whichever it saw first
+	# — which is how a stale build ends up supplying the tile and its icon.
+	-$(LSREGISTER) -u "$(APP)"
 	open "$(INSTALLED)"
 
 run: build stop
