@@ -6,7 +6,7 @@ SCHEME   := SLDepartures
 CONFIG   := Release
 BUILD    := .build/xcode
 APP      := $(BUILD)/Build/Products/$(CONFIG)/SL Departures.app
-INSTALLED := $(HOME)/Applications/SL Departures.app
+INSTALLED := /Applications/SL Departures.app
 LSREGISTER := /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
 .PHONY: all gen build test install run stop clean icon
@@ -32,12 +32,15 @@ icon:
 test:
 	swift test
 
-## Install into ~/Applications and register it, so the widget shows up in the
+## Install into /Applications and register it, so the widget shows up in the
 ## widget gallery — an app the system has never launched offers no widgets.
 install: build stop
 	rm -rf "$(INSTALLED)"
-	mkdir -p "$(HOME)/Applications"
 	cp -R "$(APP)" "$(INSTALLED)"
+	# A copy left at the old install location would stay registered under the
+	# same bundle id and race this one for the widget gallery's tile.
+	rm -rf "$(HOME)/Applications/SL Departures.app"
+	-$(LSREGISTER) -u "$(HOME)/Applications/SL Departures.app"
 	$(LSREGISTER) -f "$(INSTALLED)"
 	# Xcode registers the build-products copy as it builds. Two registrations
 	# of one bundle id leave the widget gallery listing whichever it saw first

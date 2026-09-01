@@ -30,7 +30,7 @@ cd sl-departures-widget-mac
 make install
 ```
 
-That builds, copies the app to `~/Applications`, registers it so the widget
+That builds, copies the app to `/Applications`, registers it so the widget
 appears in the widget gallery, and launches it. Then click the menu bar item and
 pick your stop.
 
@@ -40,7 +40,7 @@ a stop.
 
 ### Uninstall
 
-Quit the app, then delete `~/Applications/SL Departures.app`. The only other
+Quit the app, then delete `/Applications/SL Departures.app`. The only other
 things it creates are `~/Library/Application Support/io.github.henrrrik.sl-departures/`
 (settings) and `~/Library/Caches/io.github.henrrrik.sl-departures/` (the stop
 list), both safe to delete.
@@ -177,7 +177,7 @@ provisioning profile at all.
 ```bash
 make test      # the model, with no Xcode in the loop
 make build     # regenerate the project and build both bundles
-make install   # build, install to ~/Applications, register, launch
+make install   # build, install to /Applications, register, launch
 make run       # build and launch in place
 ```
 
