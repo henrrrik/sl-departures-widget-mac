@@ -12,6 +12,8 @@ final class StatusItemController {
     private let openSettings: () -> Void
     private var stream: StopStream
     private var observing = true
+    private var dismissMonitor: Any?
+    private var resignObserver: NSObjectProtocol?
 
     init(config: StopConfig, openSettings: @escaping () -> Void) {
         self.config = config
@@ -19,7 +21,14 @@ final class StatusItemController {
         self.stream = DepartureHub.shared.stream(for: config)
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
-        popover.behavior = .transient
+        // Dismissal is ours rather than AppKit's. A `.transient` popover
+        // closes itself on any click outside the button's *bounds* — but the
+        // menu bar is a couple of points taller than the button, so a click in
+        // that top strip both closed the popover and fired this button's
+        // action, which reopened what the same click had just put away. Owning
+        // the dismissal makes one click one toggle wherever in the item it
+        // lands; `watchForDismissal` is the rest of what `.transient` did.
+        popover.behavior = .applicationDefined
         popover.animates = false
 
         if let button = statusItem.button {
@@ -49,6 +58,7 @@ final class StatusItemController {
 
     func tearDown() {
         observing = false
+        closePopover()
         DepartureHub.shared.release(config)
         NSStatusBar.system.removeStatusItem(statusItem)
     }
@@ -114,7 +124,7 @@ final class StatusItemController {
 
     private func togglePopover() {
         if popover.isShown {
-            popover.performClose(nil)
+            closePopover()
             return
         }
         guard let button = statusItem.button else { return }
@@ -124,14 +134,47 @@ final class StatusItemController {
                 stream: stream,
                 onRefresh: { [weak self] in self?.stream.refreshNow() },
                 onOpenSettings: { [weak self] in
-                    self?.popover.performClose(nil)
+                    self?.closePopover()
                     self?.openSettings()
                 },
-                onClose: { [weak self] in self?.popover.performClose(nil) }
+                onClose: { [weak self] in self?.closePopover() }
             )
         )
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         // The popover has to be key for its keyboard shortcuts to reach it.
         popover.contentViewController?.view.window?.makeKey()
+        watchForDismissal()
+    }
+
+    /// What `.transient` used to do for us, minus the part that fought the
+    /// button: a click in another app, or the app losing focus, puts the board
+    /// away. A global monitor never sees this app's own clicks, so the status
+    /// item stays free to toggle.
+    private func watchForDismissal() {
+        endDismissalWatch()
+        dismissMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
+        ) { [weak self] _ in
+            Task { @MainActor in self?.closePopover() }
+        }
+        resignObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didResignActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.closePopover() }
+        }
+    }
+
+    private func closePopover() {
+        endDismissalWatch()
+        if popover.isShown { popover.performClose(nil) }
+    }
+
+    private func endDismissalWatch() {
+        if let dismissMonitor { NSEvent.removeMonitor(dismissMonitor) }
+        dismissMonitor = nil
+        if let resignObserver { NotificationCenter.default.removeObserver(resignObserver) }
+        resignObserver = nil
     }
 }
