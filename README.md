@@ -3,15 +3,13 @@
 Live departure times for a Stockholm public transport stop, in the macOS menu
 bar and on the desktop.
 
-<img src="Design/screenshots/menubar.png" width="139" alt="The menu bar item: two departures at a glance">
-
 Click the menu bar item and you get the full board: line, destination, berth,
 minutes left, cancellations, and any service messages for the station — plus a
 searchable stop picker, so you never have to look up a stop id by hand.
 
 <p>
-  <img src="Design/screenshots/board.png" width="452" alt="The departure board, opened from the menu bar">
-  <img src="Design/screenshots/widget.png" width="330" align="top" alt="The desktop widget">
+  <img src="Design/screenshots/board.png" width="393" alt="The departure board, opened from the menu bar item">
+  <img src="Design/screenshots/widget.png" width="366" align="top" alt="The desktop widget">
 </p>
 
 This is a macOS port of [sl-departures-widget](https://github.com/henrrrik/sl-departures-widget),
