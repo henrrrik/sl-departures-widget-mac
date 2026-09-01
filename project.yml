@@ -20,7 +20,7 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "1"
+    CURRENT_PROJECT_VERSION: "4"
     DEVELOPMENT_TEAM: 8X349UWK2Z
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: "Apple Development"
@@ -45,6 +45,12 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.henrrrik.sl-departures
         PRODUCT_NAME: SL Departures
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # Xcode otherwise writes only a token 16pt and 128pt into the app's
+        # standalone AppIcon.icns and leaves everything else to Assets.car.
+        # The widget gallery renders its sidebar icon from the containing app's
+        # .icns, finds nothing big enough there, and draws a generated grey
+        # placeholder instead. `all` puts every size in the file.
+        ASSETCATALOG_COMPILER_STANDALONE_ICON_BEHAVIOR: all
         INFOPLIST_KEY_NSHumanReadableCopyright: "MIT"
         ENABLE_APP_SANDBOX: NO
     info:
@@ -64,6 +70,10 @@ targets:
     platform: macOS
     sources:
       - path: Widget
+      # The widget gallery draws the extension's own icon in its sidebar, not
+      # the containing app's, so the appex carries the same artwork.
+      - path: App/Assets.xcassets
+        buildPhase: resources
     dependencies:
       - package: SLKit
         product: SLKit
@@ -71,6 +81,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.henrrrik.sl-departures.widget
         PRODUCT_NAME: SLWidget
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SKIP_INSTALL: YES
     entitlements:
       path: Widget/SLWidget.entitlements
