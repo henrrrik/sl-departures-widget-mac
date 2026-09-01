@@ -24,8 +24,8 @@ Needs Xcode and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 (`brew install xcodegen`).
 
 ```bash
-git clone https://github.com/henrrrik/mac-sl-departures-widget.git
-cd mac-sl-departures-widget
+git clone https://github.com/henrrrik/sl-departures-widget-mac.git
+cd sl-departures-widget-mac
 make install
 ```
 
