@@ -17,7 +17,7 @@ struct SettingsView: View {
             List(selection: $selection) {
                 ForEach(settings.stops) { stop in
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(stop.siteName.isEmpty ? "No stop picked" : stop.siteName)
+                        Text(stop.siteName.isEmpty ? String(localized: "No stop picked") : stop.siteName)
                         let summary = SLFormat.filterSummary(stop)
                         if !summary.isEmpty {
                             Text(summary).font(.caption).foregroundStyle(.secondary)
@@ -87,7 +87,7 @@ private struct StopEditor: View {
             Section("Filters") {
                 Picker("Transport", selection: transportBinding) {
                     ForEach(Self.transports, id: \.self) { mode in
-                        Text(mode.isEmpty ? "All modes" : SLFormat.modeName(mode)).tag(mode)
+                        Text(mode.isEmpty ? String(localized: "All modes") : SLFormat.modeName(mode)).tag(mode)
                     }
                 }
                 Picker("Direction", selection: directionBinding) {
@@ -101,7 +101,9 @@ private struct StopEditor: View {
 
                 LabeledContent("Walk") {
                     Stepper(
-                        stop.walkMinutes == 0 ? "No head start" : "\(stop.walkMinutes) min",
+                        stop.walkMinutes == 0
+                            ? String(localized: "No head start")
+                            : String(localized: "\(stop.walkMinutes) min"),
                         value: intBinding(\.walkMinutes, range: 0...120)
                     )
                 }
@@ -111,10 +113,10 @@ private struct StopEditor: View {
 
             Section("Display") {
                 LabeledContent("In the menu bar") {
-                    Stepper("\(stop.barCount) departures", value: intBinding(\.barCount, range: 1...6))
+                    Stepper(String(localized: "\(stop.barCount) departures"), value: intBinding(\.barCount, range: 1...6))
                 }
                 LabeledContent("In the popup") {
-                    Stepper("\(stop.panelCount) departures", value: intBinding(\.panelCount, range: 1...40))
+                    Stepper(String(localized: "\(stop.panelCount) departures"), value: intBinding(\.panelCount, range: 1...40))
                 }
                 TextField("Menu bar format", text: formatBinding)
                 Text("Tokens: {line} {wait} {min} {clock} {display} {destination}")
@@ -124,10 +126,10 @@ private struct StopEditor: View {
 
             Section("Fetching") {
                 LabeledContent("Look ahead") {
-                    Stepper("\(stop.forecastMinutes) min", value: intBinding(\.forecastMinutes, range: 10...360, step: 10))
+                    Stepper(String(localized: "\(stop.forecastMinutes) min"), value: intBinding(\.forecastMinutes, range: 10...360, step: 10))
                 }
                 LabeledContent("Refresh every") {
-                    Stepper("\(stop.refreshIntervalSec) s", value: intBinding(\.refreshIntervalSec, range: 15...600, step: 5))
+                    Stepper(String(localized: "\(stop.refreshIntervalSec) s"), value: intBinding(\.refreshIntervalSec, range: 15...600, step: 5))
                 }
                 Text("Stops sharing a site and filters share one request, however many menu bar items show them.")
                     .font(.caption).foregroundStyle(.secondary)

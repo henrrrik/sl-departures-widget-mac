@@ -62,7 +62,7 @@ struct BoardView: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(config.siteName.isEmpty ? "SL Departures" : config.siteName)
+                Text(config.siteName.isEmpty ? String(localized: "SL Departures") : config.siteName)
                     .font(.headline)
                 let summary = SLFormat.filterSummary(config)
                 if !summary.isEmpty {
@@ -141,7 +141,12 @@ struct BoardView: View {
         .padding(.vertical, 8)
     }
 
-    private func emptyState(_ title: String, detail: String, action: String?) -> some View {
+    /// Taken as LocalizedStringKey rather than String: a literal that passes
+    /// through a String parameter reaches Text already resolved, and Text draws
+    /// it verbatim instead of looking it up.
+    private func emptyState(
+        _ title: LocalizedStringKey, detail: LocalizedStringKey, action: LocalizedStringKey?
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title).font(.subheadline).bold()
             Text(detail).font(.caption).foregroundStyle(.secondary)

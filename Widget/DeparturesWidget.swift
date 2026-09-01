@@ -25,8 +25,14 @@ struct DeparturesWidget: Widget {
             DeparturesWidgetView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
-        .configurationDisplayName("SL Departures")
-        .description("Live departures for a Stockholm stop.")
+        // Resolved here rather than handed over as LocalizedStringResource.
+        // The gallery is drawn by another process, and a resource built from a
+        // literal carries `bundle: .main` — which, over there, means *that*
+        // process's bundle, where these keys are not found and the English key
+        // itself is what gets drawn. Looking them up in the extension, whose
+        // main bundle is the appex, is what puts Swedish in the gallery.
+        .configurationDisplayName(String(localized: "SL Departures"))
+        .description(String(localized: "Live departures for a Stockholm stop."))
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
@@ -71,7 +77,7 @@ struct DeparturesWidgetView: View {
     /// rest of macOS — separates a title from the list it names.
     private var header: some View {
         HStack(spacing: 4) {
-            Text(entry.siteName.isEmpty ? "SL Departures" : entry.siteName)
+            Text(entry.siteName.isEmpty ? String(localized: "SL Departures") : entry.siteName)
                 .font(.headline)
                 .lineLimit(1)
                 .widgetAccentable()
@@ -101,9 +107,9 @@ struct DeparturesWidgetView: View {
     }
 
     private var emptyMessage: String {
-        if entry.isPlaceholder { return "Pick a stop in Edit Widget." }
+        if entry.isPlaceholder { return String(localized: "Pick a stop in Edit Widget.") }
         if let error = entry.error { return error }
-        return "Nothing leaving soon."
+        return String(localized: "Nothing leaving soon.")
     }
 }
 

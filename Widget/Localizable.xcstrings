@@ -1,0 +1,240 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%lld stops": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld hållplatser"
+          }
+        }
+      }
+    },
+    "All lines, or e.g. 13, 14": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alla linjer, eller t.ex. 13, 14"
+          }
+        }
+      }
+    },
+    "All modes": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alla trafikslag"
+          }
+        }
+      }
+    },
+    "Both directions": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Båda riktningarna"
+          }
+        }
+      }
+    },
+    "Bus": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buss"
+          }
+        }
+      }
+    },
+    "Direction": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riktning"
+          }
+        }
+      }
+    },
+    "Direction 1": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riktning 1"
+          }
+        }
+      }
+    },
+    "Direction 2": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riktning 2"
+          }
+        }
+      }
+    },
+    "Ferry": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Färja"
+          }
+        }
+      }
+    },
+    "Lines": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linjer"
+          }
+        }
+      }
+    },
+    "Live departures for a Stockholm stop.": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktuella avgångar för en hållplats i Stockholm."
+          }
+        }
+      }
+    },
+    "Metro": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tunnelbana"
+          }
+        }
+      }
+    },
+    "Nothing leaving soon.": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inga avgångar inom kort."
+          }
+        }
+      }
+    },
+    "Pick a stop in Edit Widget.": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Välj en hållplats under Redigera widget."
+          }
+        }
+      }
+    },
+    "Refresh departures": {
+      "comment": "The tile's own refresh button",
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uppdatera avgångar"
+          }
+        }
+      }
+    },
+    "SL Departures": {
+      "comment": "Widget gallery entry",
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SL Avgångar"
+          }
+        }
+      }
+    },
+    "Ship": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Båt"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "comment": "--- Edit Widget: the configuration intent ---",
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hållplats"
+          }
+        }
+      }
+    },
+    "Train": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tåg"
+          }
+        }
+      }
+    },
+    "Tram": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spårvagn"
+          }
+        }
+      }
+    },
+    "Transport": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trafikslag"
+          }
+        }
+      }
+    },
+    "Updated %@": {
+      "comment": "--- The tile ---",
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uppdaterad %@"
+          }
+        }
+      }
+    },
+    "Walk (minutes)": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gångtid (minuter)"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
