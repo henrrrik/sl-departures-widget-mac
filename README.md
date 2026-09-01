@@ -3,13 +3,16 @@
 Live departure times for a Stockholm public transport stop, in the macOS menu
 bar and on the desktop.
 
-```
- 18 3′ · 19 7′
-```
+<img src="Design/screenshots/menubar.png" width="139" alt="The menu bar item: two departures at a glance">
 
 Click the menu bar item and you get the full board: line, destination, berth,
 minutes left, cancellations, and any service messages for the station — plus a
 searchable stop picker, so you never have to look up a stop id by hand.
+
+<p>
+  <img src="Design/screenshots/board.png" width="452" alt="The departure board, opened from the menu bar">
+  <img src="Design/screenshots/widget.png" width="330" align="top" alt="The desktop widget">
+</p>
 
 This is a macOS port of [sl-departures-widget](https://github.com/henrrrik/sl-departures-widget),
 an Omarchy bar widget. The model — the parsing, the filters, the clock
@@ -130,7 +133,7 @@ Useful for checking what the menu bar is claiming against the API by hand.
 | `App/` | The menu bar app: status items, the shared fetch hub, the popover, settings. |
 | `Widget/` | The WidgetKit extension: configuration intent, timeline provider, tile. |
 | `project.yml` | XcodeGen spec for the two bundles. The `.xcodeproj` is generated. |
-| `Design/`, `Tools/` | The app icon's source artwork, and the script that lays it out on Apple's icon grid — `make icon` redraws every size. |
+| `Design/`, `Tools/` | The README screenshots, the app icon’s source artwork, and the script that lays it out on Apple's icon grid — `make icon` redraws every size. |
 
 ### Shared fetching
 
