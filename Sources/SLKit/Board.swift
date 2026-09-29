@@ -62,6 +62,9 @@ public struct BoardLoader: Sendable {
         public var snapshot: DepartureSnapshot
         public var error: String?
         public var state: SLFormat.LoadState
+        /// SL answered 429, which the caller should back off from rather than
+        /// retry on its usual schedule.
+        public var rateLimited = false
     }
 
     public func load(
@@ -91,7 +94,8 @@ public struct BoardLoader: Sendable {
             return Outcome(
                 snapshot: previous ?? DepartureSnapshot(),
                 error: message,
-                state: .failed
+                state: .failed,
+                rateLimited: error as? SLError == .rateLimited
             )
         }
     }

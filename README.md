@@ -59,7 +59,10 @@ list), both safe to delete.
 
 The board refreshes every 30 seconds and counts down continuously between
 fetches, so the minutes stay honest. A failed refresh leaves the last board on
-screen rather than blanking it.
+screen rather than blanking it. If SL answers with a rate limit (HTTP 429), the
+app stops fetching for a minute, manual refreshes included, doubling the pause
+on each further 429 up to ten minutes, and resumes normally after the next
+successful fetch. The widget waits the full ten minutes before trying again.
 
 The interface follows your macOS language: English, or Swedish on a Swedish
 Mac. That covers the widget and its edit sheet too — down to the words the

@@ -19,6 +19,9 @@ final class DepartureHub {
 
     private var streams: [String: StopStream] = [:]
     private let loader: BoardLoader
+    /// Hub-wide, because SL's quota covers the caller rather than one URL:
+    /// once any stream draws a 429, none of them fetches until it lapses.
+    var backoff = SLBackoff()
 
     init(loader: BoardLoader = BoardLoader()) {
         self.loader = loader
@@ -31,7 +34,7 @@ final class DepartureHub {
             existing.register(config)
             return existing
         }
-        let stream = StopStream(config: config, loader: loader)
+        let stream = StopStream(config: config, loader: loader, hub: self)
         streams[key] = stream
         stream.start()
         return stream
@@ -76,14 +79,16 @@ final class StopStream {
     static let countdownInterval: TimeInterval = 15
 
     private let loader: BoardLoader
+    private weak var hub: DepartureHub?
     private let url: String
     private var fetchConfig: StopConfig
     private var subscribers: [UUID: StopConfig] = [:]
     private var fetchTask: Task<Void, Never>?
     private var tickTask: Task<Void, Never>?
 
-    init(config: StopConfig, loader: BoardLoader) {
+    init(config: StopConfig, loader: BoardLoader, hub: DepartureHub) {
         self.loader = loader
+        self.hub = hub
         self.url = DepartureHub.key(for: config)
         self.fetchConfig = config
         self.subscribers = [config.id: config]
@@ -133,17 +138,30 @@ final class StopStream {
         fetchTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.fetchOnce()
-                try? await Task.sleep(for: .seconds(interval))
+                // Sleep through whatever is left of a backoff rather than wake
+                // on the usual interval only to skip the fetch.
+                let wait = max(interval, self?.hub?.backoff.remaining() ?? 0)
+                try? await Task.sleep(for: .seconds(wait))
             }
         }
     }
 
     private func fetchOnce() async {
+        // Manual refreshes included: during a backoff they would only draw
+        // another 429 and push the quota window further out.
+        if hub?.backoff.isActive() == true { return }
+
         let outcome = await loader.load(config: fetchConfig, previous: snapshot.isEmpty ? nil : snapshot)
         guard !Task.isCancelled else { return }
 
         snapshot = outcome.snapshot
-        error = outcome.error
+        if outcome.rateLimited {
+            hub?.backoff.rateLimited()
+            error = hub?.backoff.message ?? outcome.error
+        } else {
+            if outcome.error == nil { hub?.backoff.succeeded() }
+            error = outcome.error
+        }
         // A failed refresh with a board already on screen is not an error state:
         // the countdown is still correct, it is just not getting newer.
         state = outcome.state == .failed && !snapshot.isEmpty ? .ready : outcome.state

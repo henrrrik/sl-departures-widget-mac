@@ -54,9 +54,16 @@ struct DeparturesProvider: AppIntentTimelineProvider {
         }
 
         // Ask to be woken before the precomputed run is used up. A failed fetch
-        // asks sooner, because there is nothing worth counting down from.
-        let retry = outcome.error == nil ? 15.0 : 5.0
-        return Timeline(entries: entries, policy: .after(now.addingTimeInterval(retry * 60)))
+        // asks sooner, because there is nothing worth counting down from —
+        // unless SL is rate limiting, when asking sooner only draws another
+        // 429. The extension keeps no state between reloads, so it waits out
+        // the longest backoff the app would.
+        let retry: TimeInterval = if outcome.rateLimited {
+            SLBackoff.cap
+        } else {
+            outcome.error == nil ? 15 * 60 : 5 * 60
+        }
+        return Timeline(entries: entries, policy: .after(now.addingTimeInterval(retry)))
     }
 
     private func entry(at date: Date, config: StopConfig, outcome: BoardLoader.Outcome) -> DeparturesEntry {

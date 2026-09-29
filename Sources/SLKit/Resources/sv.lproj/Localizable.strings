@@ -25,3 +25,7 @@
 "SL replied %lld" = "SL svarade %lld";
 "SL response larger than expected, refusing" = "SL:s svar var större än väntat, avbryter";
 "Unreadable response from SL" = "Oläsligt svar från SL";
+"SL rate limit reached" = "SL:s anropsgräns nådd";
+
+/* Shown while fetching is paused after a 429 */
+"SL rate limit reached, retrying in %lld min" = "SL:s anropsgräns nådd, försöker igen om %lld min";

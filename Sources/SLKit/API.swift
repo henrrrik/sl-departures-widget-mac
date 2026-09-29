@@ -1,7 +1,8 @@
 import Foundation
 
 /// SL's open "Transport" API. No account, no key, no rate-limit header — the
-/// same two endpoints the Omarchy widget reads.
+/// same two endpoints the Omarchy widget reads. There is a quota all the same,
+/// answered with a bare 429; see `SLBackoff`.
 ///
 ///   https://transport.integration.sl.se/v1/sites?expand=false
 ///   https://transport.integration.sl.se/v1/sites/{id}/departures
@@ -127,6 +128,7 @@ public struct RawSite: Codable, Hashable, Sendable {
 public enum SLError: Error, LocalizedError, Equatable {
     case unreachable(String)
     case httpStatus(Int)
+    case rateLimited
     case tooLarge
     case unreadable
 
@@ -134,6 +136,7 @@ public enum SLError: Error, LocalizedError, Equatable {
         switch self {
         case .unreachable: t("No response from SL")
         case .httpStatus(let code): t("SL replied \(code)")
+        case .rateLimited: t("SL rate limit reached")
         case .tooLarge: t("SL response larger than expected, refusing")
         case .unreadable: t("Unreadable response from SL")
         }
@@ -190,6 +193,9 @@ public struct SLClient: Sendable {
             throw SLError.tooLarge
         } catch {
             throw SLError.unreachable(error.localizedDescription)
+        }
+        if let http = response as? HTTPURLResponse, http.statusCode == 429 {
+            throw SLError.rateLimited
         }
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
             throw SLError.httpStatus(http.statusCode)
