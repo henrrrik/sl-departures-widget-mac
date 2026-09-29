@@ -128,7 +128,7 @@ final class StatusItemController {
             return
         }
         guard let button = statusItem.button else { return }
-        popover.contentViewController = NSHostingController(
+        let host = NSHostingController(
             rootView: BoardView(
                 config: config,
                 stream: stream,
@@ -140,6 +140,14 @@ final class StatusItemController {
                 onClose: { [weak self] in self?.closePopover() }
             )
         )
+        // Size changes go through the popover, not straight to its window. By
+        // default the hosting view resizes the window itself, and a window
+        // keeps its bottom-left origin — so when the board got shorter after
+        // opening (rows giving way to "Nothing leaving", say), the top edge
+        // slid down and left the popover hanging well below the menu bar.
+        // NSPopover re-anchors to the arrow when preferredContentSize changes.
+        host.sizingOptions = [.preferredContentSize]
+        popover.contentViewController = host
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         // The popover has to be key for its keyboard shortcuts to reach it.
         popover.contentViewController?.view.window?.makeKey()
