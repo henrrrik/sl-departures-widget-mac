@@ -52,6 +52,8 @@ final class StatusItemController {
             DepartureHub.shared.release(previous)
             stream = DepartureHub.shared.stream(for: config)
             observe()
+        } else {
+            stream.register(config)
         }
         render()
     }

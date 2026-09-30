@@ -18,7 +18,8 @@ struct BoardView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        let rows = rows
+        return VStack(alignment: .leading, spacing: 0) {
             header
             Divider()
 
@@ -37,7 +38,7 @@ struct BoardView: View {
                     action: nil
                 )
             } else {
-                board
+                board(rows: rows)
             }
 
             Divider()
@@ -88,7 +89,7 @@ struct BoardView: View {
 
     // MARK: - Board
 
-    private var board: some View {
+    private func board(rows: [DepartureRow]) -> some View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
@@ -110,6 +111,7 @@ struct BoardView: View {
     }
 
     private func scroll(by delta: Int) {
+        let rows = rows
         guard !rows.isEmpty else { return }
         let current = rows.firstIndex { $0.id == scrollTarget } ?? 0
         let next = (current + delta).clamped(to: 0...(rows.count - 1))

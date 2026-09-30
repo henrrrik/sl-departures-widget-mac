@@ -9,6 +9,7 @@ struct DeparturesEntry: TimelineEntry {
     var fetchedAt: Date?
     var error: String?
     var isPlaceholder = false
+    var isStale = false
 }
 
 /// One fetch per reload, rendered as a whole run of entries.
@@ -20,7 +21,7 @@ struct DeparturesEntry: TimelineEntry {
 /// drop off, and the ones behind them slide up. What a reload actually buys is
 /// *new* information — a cancellation, a delay — not the arithmetic.
 struct DeparturesProvider: AppIntentTimelineProvider {
-    private let loader = BoardLoader()
+    private static let loader = WidgetBoardLoader()
 
     func placeholder(in context: Context) -> DeparturesEntry {
         DeparturesEntry(
@@ -37,8 +38,8 @@ struct DeparturesProvider: AppIntentTimelineProvider {
     func snapshot(for configuration: DeparturesConfigurationIntent, in context: Context) async -> DeparturesEntry {
         let config = configuration.stopConfig()
         guard config.isConfigured else { return placeholder(in: context) }
-        let outcome = await loader.load(config: config)
-        return entry(at: Date(), config: config, outcome: outcome)
+        let result = await Self.loader.load(config: config)
+        return Self.entry(at: Date(), config: config, outcome: result.outcome)
     }
 
     func timeline(for configuration: DeparturesConfigurationIntent, in context: Context) async -> Timeline<DeparturesEntry> {
@@ -47,26 +48,29 @@ struct DeparturesProvider: AppIntentTimelineProvider {
             return Timeline(entries: [placeholder(in: context)], policy: .never)
         }
 
+        let result = await Self.loader.load(config: config)
         let now = Date()
-        let outcome = await loader.load(config: config, wallNow: now)
-        let entries = (0..<SLWidgetKind.timelineMinutes).map { minute in
-            entry(at: now.addingTimeInterval(TimeInterval(minute) * 60), config: config, outcome: outcome)
-        }
-
-        // Ask to be woken before the precomputed run is used up. A failed fetch
-        // asks sooner, because there is nothing worth counting down from —
-        // unless SL is rate limiting, when asking sooner only draws another
-        // 429. The extension keeps no state between reloads, so it waits out
-        // the longest backoff the app would.
-        let retry: TimeInterval = if outcome.rateLimited {
-            SLBackoff.cap
-        } else {
-            outcome.error == nil ? 15 * 60 : 5 * 60
-        }
-        return Timeline(entries: entries, policy: .after(now.addingTimeInterval(retry)))
+        let entries = Self.entries(at: now, config: config, outcome: result.outcome)
+        let retryAt = result.retryAt ?? now.addingTimeInterval(result.outcome.error == nil ? 15 * 60 : 5 * 60)
+        return Timeline(entries: entries, policy: .after(retryAt))
     }
 
-    private func entry(at date: Date, config: StopConfig, outcome: BoardLoader.Outcome) -> DeparturesEntry {
+    static func entries(at now: Date, config: StopConfig, outcome: BoardLoader.Outcome) -> [DeparturesEntry] {
+        var entries = (0..<SLWidgetKind.timelineMinutes).map { minute in
+            entry(at: now.addingTimeInterval(TimeInterval(minute) * 60), config: config, outcome: outcome)
+        }
+        // Reload dates are requests, not deadlines. Once these countdowns run
+        // out, explicitly retire them even if WidgetKit postpones our fetch.
+        var expired = entry(at: now.addingTimeInterval(TimeInterval(SLWidgetKind.timelineMinutes) * 60),
+                            config: config, outcome: outcome)
+        expired.rows = []
+        expired.stopDeviations = []
+        expired.isStale = outcome.error == nil
+        entries.append(expired)
+        return entries
+    }
+
+    private static func entry(at date: Date, config: StopConfig, outcome: BoardLoader.Outcome) -> DeparturesEntry {
         DeparturesEntry(
             date: date,
             siteName: config.siteName,

@@ -6,6 +6,20 @@ import Testing
 struct BackoffTests {
     static let now = Date(timeIntervalSince1970: 1_800_000_000)
 
+    @Test("A success started before a 429 cannot clear its backoff")
+    func ignoresOlderSuccess() {
+        var backoff = SLBackoff()
+        let oldRequest = backoff.generation
+        backoff.rateLimited(at: Self.now)
+        backoff.succeeded(generation: oldRequest)
+        #expect(backoff.isActive(at: Self.now))
+        #expect(backoff.wait == 60)
+        let retry = backoff.generation
+        backoff.succeeded(generation: retry)
+        #expect(!backoff.isActive(at: Self.now.addingTimeInterval(60)))
+        #expect(backoff.wait == 0)
+    }
+
     @Test("Starts at a minute and doubles on each consecutive 429")
     func doubles() {
         var backoff = SLBackoff()

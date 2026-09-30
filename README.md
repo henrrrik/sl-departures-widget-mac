@@ -62,7 +62,8 @@ fetches, so the minutes stay honest. A failed refresh leaves the last board on
 screen rather than blanking it. If SL answers with a rate limit (HTTP 429), the
 app stops fetching for a minute, manual refreshes included, doubling the pause
 on each further 429 up to ten minutes, and resumes normally after the next
-successful fetch. The widget waits the full ten minutes before trying again.
+successful fetch. The widget persists a ten-minute cooldown across reloads and
+extension restarts; its refresh button observes that cooldown too.
 
 The interface follows your macOS language: English, or Swedish on a Swedish
 Mac. That covers the widget and its edit sheet too — down to the words the
@@ -72,7 +73,9 @@ model writes itself, like `nu` for a departure leaving within the minute.
 
 Everything is in the settings window, and also in a plain file at
 `~/Library/Application Support/io.github.henrrrik.sl-departures/settings.json`,
-which is watched — edits apply without a restart.
+which is watched — edits apply without a restart. An invalid edit keeps the last
+working configuration active and shows an error in settings. Repair the file to
+resume editing in the app.
 
 ```json
 {
@@ -161,8 +164,9 @@ WidgetKit renders timeline entries for free but budgets how often it will wake
 an extension to fetch — on the order of once every 15 minutes or worse. So a
 single fetch is expanded into one entry per minute for the next 25: the tile
 counts down correctly the whole time, departed services drop off, and the ones
-behind them slide up. A reload buys *new* information — a cancellation, a delay
-— not the arithmetic.
+behind them slide up. A final entry removes the countdowns and asks for a refresh
+if the system delays the next reload. A reload buys *new* information — a
+cancellation, a delay — not the arithmetic.
 
 Two things push against the budget: the app calls
 `WidgetCenter.reloadTimelines` after each of its own fetches, which the system
@@ -178,7 +182,7 @@ provisioning profile at all.
 ## Development
 
 ```bash
-make test      # the model, with no Xcode in the loop
+make test      # model, app coordinators, and widget timeline regressions
 make build     # regenerate the project and build both bundles
 make install   # build, install to /Applications, register, launch
 make run       # build and launch in place

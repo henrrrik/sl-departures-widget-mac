@@ -109,6 +109,7 @@ struct DeparturesWidgetView: View {
     private var emptyMessage: String {
         if entry.isPlaceholder { return String(localized: "Pick a stop in Edit Widget.") }
         if let error = entry.error { return error }
+        if entry.isStale { return String(localized: "Departure times expired. Refresh to update.") }
         return String(localized: "Nothing leaving soon.")
     }
 }

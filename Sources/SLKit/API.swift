@@ -112,8 +112,8 @@ public struct DeparturesResponse: Codable, Hashable, Sendable {
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        departures = (try? c.decode([Departure].self, forKey: .departures)) ?? []
-        stopDeviations = (try? c.decode([StopDeviation].self, forKey: .stopDeviations)) ?? []
+        departures = try c.decode([Departure].self, forKey: .departures)
+        stopDeviations = try c.decodeIfPresent([StopDeviation].self, forKey: .stopDeviations) ?? []
     }
 }
 
@@ -175,51 +175,110 @@ public struct SLClient: Sendable {
         try await load(SLAPI.sitesURL, timeout: 30, cap: Self.sitesCap)
     }
 
-    /// Bounded two ways, because neither guard covers the other case: the
-    /// delegate refuses an oversized response before a byte of the body is
-    /// read, and the count check catches a chunked response that declared no
-    /// length at all. Reading in bulk rather than byte-by-byte matters — the
-    /// site list is megabytes.
+    /// Accumulates bounded chunks, including responses without Content-Length.
     private func load(_ url: URL, timeout: TimeInterval, cap: Int) async throws -> Data {
         var request = URLRequest(url: url)
         request.timeoutInterval = timeout
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-
-        let data: Data
-        let response: URLResponse
+        let receiver = BoundedRequest(cap: cap)
         do {
-            (data, response) = try await session.data(for: request, delegate: CapDelegate(cap: cap))
+            return try await withTaskCancellationHandler {
+                try await withCheckedThrowingContinuation { continuation in
+                    receiver.start(session: session, request: request, continuation: continuation)
+                }
+            } onCancel: {
+                receiver.cancel()
+            }
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch let error as SLError {
+            throw error
         } catch let error as URLError where error.code == .cancelled {
-            throw SLError.tooLarge
+            throw CancellationError()
         } catch {
             throw SLError.unreachable(error.localizedDescription)
         }
-        if let http = response as? HTTPURLResponse, http.statusCode == 429 {
-            throw SLError.rateLimited
-        }
-        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
-            throw SLError.httpStatus(http.statusCode)
-        }
-        guard data.count <= cap else { throw SLError.tooLarge }
-        return data
     }
 }
 
-/// Cancels a response whose declared length is already over the cap, so an
-/// oversized payload is never buffered in the first place.
-private final class CapDelegate: NSObject, URLSessionDataDelegate, Sendable {
-    let cap: Int
+/// Delegate callbacks and task cancellation can run on different queues.
+/// All mutable state is protected by the lock; completion resumes exactly once.
+private final class BoundedRequest: NSObject, URLSessionDataDelegate, @unchecked Sendable {
+    private let cap: Int
+    private let lock = NSLock()
+    private var data = Data()
+    private var task: URLSessionDataTask?
+    private var continuation: CheckedContinuation<Data, any Error>?
+    private var failure: SLError?
+    private var cancelled = false
 
-    init(cap: Int) {
-        self.cap = cap
-        super.init()
+    init(cap: Int) { self.cap = cap }
+
+    func start(session: URLSession, request: URLRequest,
+               continuation: CheckedContinuation<Data, any Error>) {
+        lock.withLock {
+            guard !cancelled else {
+                continuation.resume(throwing: CancellationError())
+                return
+            }
+            self.continuation = continuation
+            let task = session.dataTask(with: request)
+            task.delegate = self
+            self.task = task
+            task.resume()
+        }
     }
 
-    func urlSession(
-        _ session: URLSession,
-        dataTask: URLSessionDataTask,
-        didReceive response: URLResponse
-    ) async -> URLSession.ResponseDisposition {
-        response.expectedContentLength > Int64(cap) ? .cancel : .allow
+    func cancel() {
+        let task = lock.withLock {
+            cancelled = true
+            return self.task
+        }
+        task?.cancel()
+    }
+
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask,
+                    didReceive response: URLResponse,
+                    completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+        let disposition: URLSession.ResponseDisposition = lock.withLock {
+            if let http = response as? HTTPURLResponse, http.statusCode == 429 {
+                failure = .rateLimited
+            } else if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+                failure = .httpStatus(http.statusCode)
+            } else if response.expectedContentLength > Int64(cap) {
+                failure = .tooLarge
+            }
+            return failure == nil && !cancelled ? .allow : .cancel
+        }
+        completionHandler(disposition)
+    }
+
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive chunk: Data) {
+        let shouldCancel = lock.withLock {
+            guard failure == nil, !cancelled else { return true }
+            guard chunk.count <= cap - data.count else {
+                failure = .tooLarge
+                return true
+            }
+            data.append(chunk)
+            return false
+        }
+        if shouldCancel { dataTask.cancel() }
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
+        let completion = lock.withLock { () -> (CheckedContinuation<Data, any Error>?, Result<Data, any Error>) in
+            let result: Result<Data, any Error>
+            if cancelled { result = .failure(CancellationError()) }
+            else if let failure { result = .failure(failure) }
+            else if let error { result = .failure(error) }
+            else { result = .success(data) }
+            let continuation = self.continuation
+            self.continuation = nil
+            self.task = nil
+            data = Data()
+            return (continuation, result)
+        }
+        completion.0?.resume(with: completion.1)
     }
 }

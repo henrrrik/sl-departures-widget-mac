@@ -66,6 +66,20 @@ struct SettingsView: View {
                 Text("No stops").foregroundStyle(.secondary)
             }
         }
+        .disabled(settings.loadError != nil)
+        .safeAreaInset(edge: .bottom) {
+            if let error = settings.loadError ?? settings.saveError {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Could not load or save settings. Check settings.json.")
+                        .font(.headline)
+                    Text(error).font(.caption).textSelection(.enabled)
+                    Text(settings.settingsPath).font(.caption).textSelection(.enabled)
+                }
+                .foregroundStyle(.red)
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
         .frame(minWidth: 720, minHeight: 460)
         .task { await search.load() }
         .onAppear { if selection == nil { selection = settings.stops.first?.id } }

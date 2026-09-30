@@ -98,15 +98,21 @@ final class StopStream {
 
     func register(_ config: StopConfig) {
         subscribers[config.id] = config
-        // The most frequent subscriber sets the pace for everyone on this URL.
-        if config.refreshIntervalSec < fetchConfig.refreshIntervalSec {
-            fetchConfig = config
-            restartTimer()
-        }
+        updateInterval()
     }
 
     func unregister(_ config: StopConfig) {
         subscribers.removeValue(forKey: config.id)
+        updateInterval()
+    }
+
+    var refreshIntervalSec: Int { fetchConfig.refreshIntervalSec }
+
+    private func updateInterval() {
+        guard let fastest = subscribers.values.min(by: { $0.refreshIntervalSec < $1.refreshIntervalSec }) else { return }
+        let changed = fastest.refreshIntervalSec != fetchConfig.refreshIntervalSec
+        fetchConfig = fastest
+        if changed, fetchTask != nil { restartTimer() }
     }
 
     func start() {
@@ -151,6 +157,7 @@ final class StopStream {
         // another 429 and push the quota window further out.
         if hub?.backoff.isActive() == true { return }
 
+        let generation = hub?.backoff.generation
         let outcome = await loader.load(config: fetchConfig, previous: snapshot.isEmpty ? nil : snapshot)
         guard !Task.isCancelled else { return }
 
@@ -159,7 +166,7 @@ final class StopStream {
             hub?.backoff.rateLimited()
             error = hub?.backoff.message ?? outcome.error
         } else {
-            if outcome.error == nil { hub?.backoff.succeeded() }
+            if outcome.error == nil { hub?.backoff.succeeded(generation: generation) }
             error = outcome.error
         }
         // A failed refresh with a board already on screen is not an error state:

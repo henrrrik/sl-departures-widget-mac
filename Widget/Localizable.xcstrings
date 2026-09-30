@@ -234,6 +234,16 @@
           }
         }
       }
+    },
+    "Departure times expired. Refresh to update.": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avgångstiderna har gått ut. Uppdatera för att se nya tider."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

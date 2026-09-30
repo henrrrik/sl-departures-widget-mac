@@ -23,6 +23,19 @@ let package = Package(
             name: "SLKitTests",
             dependencies: ["SLKit"],
             resources: [.copy("Fixtures")]
-        )
+        ),
+        // Compile the production coordinators directly for lifecycle tests,
+        // without launching an app or requiring a signed widget bundle.
+        .target(name: "AppSupport", dependencies: ["SLKit"], path: "App",
+                exclude: ["main.swift", "AppDelegate.swift", "BoardView.swift", "SettingsView.swift",
+                          "SiteSearch.swift", "StatusItemController.swift", "Assets.xcassets",
+                          "Localizable.xcstrings", "InfoPlist.xcstrings", "Info.plist"],
+                sources: ["DepartureHub.swift", "SettingsStore.swift"]),
+        .testTarget(name: "AppSupportTests", dependencies: ["AppSupport", "SLKit"]),
+        .target(name: "WidgetSupport", dependencies: ["SLKit"], path: "Widget",
+                exclude: ["DeparturesWidget.swift", "Localizable.xcstrings", "InfoPlist.xcstrings",
+                          "Info.plist", "SLWidget.entitlements"],
+                sources: ["DeparturesProvider.swift", "DeparturesIntent.swift", "SiteEntity.swift"]),
+        .testTarget(name: "WidgetSupportTests", dependencies: ["WidgetSupport", "SLKit"])
     ]
 )

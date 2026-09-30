@@ -457,6 +457,16 @@
           }
         }
       }
+    },
+    "Could not load or save settings. Check settings.json.": {
+      "localizations": {
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunde inte läsa eller spara inställningar. Kontrollera settings.json."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

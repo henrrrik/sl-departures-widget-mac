@@ -13,6 +13,8 @@ import SLKit
 @Observable
 final class SettingsStore {
     private(set) var stops: [StopConfig]
+    private(set) var loadError: String?
+    private(set) var saveError: String?
 
     private let fileURL: URL
 
@@ -21,7 +23,14 @@ final class SettingsStore {
 
     init(fileURL: URL? = nil) {
         self.fileURL = fileURL ?? SettingsStore.defaultURL()
-        self.stops = SettingsStore.read(from: self.fileURL)
+        self.stops = [StopConfig()]
+        do {
+            self.stops = try SettingsStore.read(from: self.fileURL)
+        } catch CocoaError.fileReadNoSuchFile {
+            // First launch: there is no configuration yet.
+        } catch {
+            loadError = error.localizedDescription
+        }
         startWatching()
     }
 
@@ -71,10 +80,16 @@ final class SettingsStore {
 
     /// Compares before assigning, so the app's own `save()` does not bounce
     /// back through the watcher and interrupt whatever is being edited.
-    private func reloadIfChanged() {
-        let onDisk = SettingsStore.read(from: fileURL)
-        guard onDisk != stops else { return }
-        stops = onDisk
+    func reloadIfChanged() {
+        do {
+            let onDisk = try SettingsStore.read(from: fileURL)
+            loadError = nil
+            if onDisk != stops { stops = onDisk }
+        } catch {
+            // Editors may truncate or replace the file before completing a save.
+            // Keep the last valid configuration until a later event can read it.
+            loadError = error.localizedDescription
+        }
     }
 
     static func defaultURL() -> URL {
@@ -90,29 +105,38 @@ final class SettingsStore {
     // MARK: - Editing
 
     func add(_ stop: StopConfig) {
+        guard loadError == nil else { return }
         stops.append(stop)
         save()
     }
 
     func update(_ stop: StopConfig) {
+        guard loadError == nil else { return }
         guard let index = stops.firstIndex(where: { $0.id == stop.id }) else { return }
         stops[index] = stop
         save()
     }
 
     func remove(_ stop: StopConfig) {
+        guard loadError == nil else { return }
         stops.removeAll { $0.id == stop.id }
         save()
     }
 
     func save() {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
-        guard let data = try? encoder.encode(Document(stops: stops)) else { return }
-        try? FileManager.default.createDirectory(
-            at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true
-        )
-        try? data.write(to: fileURL, options: .atomic)
+        guard loadError == nil else { return }
+        do {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+            let data = try encoder.encode(Document(stops: stops))
+            try FileManager.default.createDirectory(
+                at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true
+            )
+            try data.write(to: fileURL, options: .atomic)
+            saveError = nil
+        } catch {
+            saveError = error.localizedDescription
+        }
     }
 
     // MARK: - Login item
@@ -138,19 +162,18 @@ final class SettingsStore {
         var stops: [StopConfig]
     }
 
-    /// A missing file is a first run, and a broken one is not worth losing the
-    /// menu bar over: either way the app starts with a single unconfigured stop
-    /// whose status item invites you to pick one.
-    private static func read(from url: URL) -> [StopConfig] {
-        guard let data = try? Data(contentsOf: url) else { return [StopConfig()] }
-        if let document = try? JSONDecoder().decode(Document.self, from: data), !document.stops.isEmpty {
-            return document.stops
+    private static func read(from url: URL) throws -> [StopConfig] {
+        let data = try Data(contentsOf: url)
+        let decoder = JSONDecoder()
+        let stops: [StopConfig]
+        if let array = try? decoder.decode([StopConfig].self, from: data) {
+            stops = array
+        } else {
+            stops = try decoder.decode(Document.self, from: data).stops
         }
-        // Also accept a bare array, which is what someone hand-writing the file
-        // is most likely to produce.
-        if let stops = try? JSONDecoder().decode([StopConfig].self, from: data), !stops.isEmpty {
-            return stops
+        guard !stops.isEmpty else {
+            throw DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "At least one stop is required."))
         }
-        return [StopConfig()]
+        return stops
     }
 }

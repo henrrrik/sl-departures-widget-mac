@@ -13,6 +13,7 @@ public struct SLBackoff: Sendable, Equatable {
     /// The wait the last 429 imposed, zero when not backing off.
     public private(set) var wait: TimeInterval = 0
     public private(set) var until: Date = .distantPast
+    public private(set) var generation: UInt64 = 0
 
     public init() {}
 
@@ -30,11 +31,13 @@ public struct SLBackoff: Sendable, Equatable {
     /// is the same trip, not a further one, and does not double the wait.
     public mutating func rateLimited(at now: Date = Date()) {
         guard !isActive(at: now) else { return }
+        generation &+= 1
         wait = wait > 0 ? min(wait * 2, Self.cap) : Self.floor
         until = now.addingTimeInterval(wait)
     }
 
-    public mutating func succeeded() {
+    public mutating func succeeded(generation requestGeneration: UInt64? = nil) {
+        if let requestGeneration, requestGeneration != generation { return }
         wait = 0
         until = .distantPast
     }
