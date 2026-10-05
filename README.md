@@ -21,6 +21,20 @@ which needs no account and no API key.
 
 ## Install
 
+### From a release
+
+Download the `.dmg` from [Releases](https://github.com/henrrrik/sl-departures-widget-mac/releases),
+open it, and drag **SL Departures** into Applications.
+
+The app is signed but not notarized by Apple, so macOS will refuse to open a
+downloaded copy. Clear the quarantine flag once, then launch it as usual:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/SL Departures.app"
+```
+
+### From source
+
 Needs Xcode and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 (`brew install xcodegen`).
 
@@ -186,7 +200,12 @@ make test      # model, app coordinators, and widget timeline regressions
 make build     # regenerate the project and build both bundles
 make install   # build, install to /Applications, register, launch
 make run       # build and launch in place
+make dmg       # package the current version as a universal .dmg in .build/
+make release VERSION=1.0.4   # bump, commit, tag v1.0.4, build the .dmg
 ```
+
+`make release` doesn't push. Push the commit and tag, then attach
+`.build/SL-Departures-<version>.dmg` to the GitHub release for that tag.
 
 `project.yml` is the source of truth; `SLDepartures.xcodeproj` is generated and
 gitignored, so `make gen` after changing a target or a build setting.
